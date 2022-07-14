@@ -1,0 +1,40 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+int M, N,i,split,k;
+
+int main()
+{
+	FILE *fin, *fout;
+	fin = fopen("cco.in", "r");
+	if (fin == NULL) {
+		printf("Eroare la deschiderea fisierului de intrare!");
+		return 0;
+	}
+	fout = fopen("cco.out", "w");
+	if (fout == NULL) {
+		printf("Eroare la deschiderea fisierului de iesire!");
+		return 0;
+	}
+	fscanf(fin, "%d", &M); //se citesc dimensiunile tabletei de ciocolata
+	fscanf(fin, "%d", &N);
+	fclose(fin);
+	if ((N >= 0 && N <= 100) && (M >= 0 && M <= 100)) { //daca aceste dimensiuni se afla in intervalul stabilit
+		if (N == 0 || M == 0) { //intai tratam cazul in care nu exista linii sau coloane
+			fprintf(fout, "%d", 0); //deci nu se realizeaza nicio impartire a tabletei
+			return 0;
+		}
+		if (M != 0 && N != 0) { //daca exista linii si coloane
+			k = M * N;
+			split = k - 1; //numarul minim de impartiri va fi egal cu produsul dintre linii si coloane minus 1
+		}
+	}
+	else {
+		fprintf(fout, "Valorile citite nu se afla in intervalul stabilit!"); //cazul in care se citesc valori inafara intervalului [0,100]
+		return 0;
+	}
+	fprintf(fout, "%d", split);
+	fclose(fout);
+	system("pause");
+	return 0;
+}
