@@ -1,0 +1,66 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+int i, j, a[9][9], ok = 0, k, sw = 0,protejat=0;
+char c;
+int main()
+{
+	FILE* fin, * fout;
+	fin = fopen("pio.in", "r");
+	if (fin == NULL)
+	{
+		printf("Eroare la deschiderea fisierului");
+		return 0;
+	}
+	for (i = 8; i >= 1; i--)  //creez matricea ce reprezinta tabla de sah, liniile incepand de la 8 pana la 1
+		for (j = 1; j <= 8; j++) //iar coloanele de la a pana la h, pe care le-am inlocuit cu cifre de la 1 pana la 8
+			a[i][j] = 0;         //am initializat elementele din matricea tablei de sah cu 0, pentru a marca unde nu se afla pioni pe tabla
+	while ((c = fgetc(fin)) != EOF) //cat timp se citesc caractere din fisierul de intrare si nu s-a ajuns la finalul acestuia
+	{
+		if (c == ' ') { //daca se intalneste spatiu, se reseteaza contorul pentru rand si cel pentru coloana, dar si variabilele ce verifica daca s-a intalnit litera sau cifra
+			//am realizat acest lucru deoarece spatiul este cel care delimiteaza pionii cititi, de forma: literacifra
+			k = 0; //contorul pentru rand
+			j = 0; //contorul pentru coloana
+			ok = 0; //variabila de control pentru intalnirea unei litere
+			sw = 0; //variabila de control pentru intalnirea unei cifre
+		}
+		else
+			if (c >= 'a' && c <= 'g') { //daca se gaseste o litera
+				ok = 1; //se semnaleaza gasirea ei
+				c = c - (int)96; //se transforma litera in cifra corespunzatoare coloanei pe care se afla pionul
+				j = c; //se salveaza pozitia pionului
+			}
+		else
+			if (c >= '1' && c <= '8') { //daca se gaseste o cifra
+				sw = 1; //se semnaleaza gasirea ei
+				c = c - '0'; //se transforma caracterul in cifra corespunzatoare liniei pe care se afla pionul
+				k = c; //se salveaza pozitia pionului
+			}
+		if (ok == 1 && sw == 1) a[k][j] = 1; //daca s-a gasit o litera si o cifra, se va schimba valoarea din matrice, conform pozitiilor salvate
+	}
+	fclose(fin);
+	fout = fopen("pio.out", "w");
+	if (fout == NULL)
+	{
+		printf("Eroare la deschiderea fisierului");
+		return 0;
+	}
+	fprintf(fout, "Asa arata tabla dvs de sah:\n\n");
+	for (i = 8; i >= 1; i--)
+	{
+		for (j = 1; j <= 8; j++)
+			fprintf(fout, "%d ", a[i][j]);  //unde apare valoarea 1 in matrice, acolo se afla cate un pion pe "tabla de sah"
+		fprintf(fout, "\n");
+	}
+	for (i = 8; i >= 1; i--)
+		for (j = 1; j <= 8; j++)
+			if(a[i][j]==1)       //daca se gaseste un pion pe pozitia curenta
+			if (a[i - 1][j - 1] == 1 || a[i - 1][j + 1] == 1) protejat++; //se verifica daca in colturile sale de jos, stanga sau dreapta, exista pion
+	//daca exista, contorul ce retine numarul de pioni protejati, va creste
+	fprintf(fout, "\n\nNumarul de pioni protejati este: %d", protejat);
+	fclose(fout);
+	printf("\n");
+	system("pause");
+	return 0;
+}
