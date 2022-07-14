@@ -1,0 +1,178 @@
+#define _CRT_SECURE_NO_WARNINGS 
+#include <stdio.h>
+#include <stdlib.h>
+int *a, *b, *R, *I, *D1, *D2, i, j, k,m,n;
+FILE *fin, *fout;
+
+void Reuniune(int *a, int *b, int m, int n)
+{
+	R = (int*)malloc((m + n) * sizeof(int)); //am alocat spatiu in vector pentru valorile cuprinse in reuniune
+	//(m+n) reprezinta maximul de elemente pe care le poate avea acest vector, daca toate elementele celor doua multimi sunt diferite
+	i = 0; //contorul primei multimi
+	j = 0; //contorul celei de-a doua multime
+	k = 0; //contorul vectorului de reuniune
+	//algoritmul de interclasare, parcurge cele doua multimi ordonate crescator
+	while (i < m && j < n) { //cat timp exista elemente in ambele multimi
+		if (a[i] < b[j]) { //daca gaseste un element mai mic in prima multime, il va lua pe acela pentru a forma reuniunea, in ordine crescatoare
+			R[k] = a[i]; //se adauga elementul gasit in vectorul de reuniune
+			i++; //se trece la urmatorul element din prima multime
+			k++; //creste contorul vectorului format
+		}
+		else
+			if (a[i] == b[j]) { //daca se gasesc doua elemente identice, unul dintre elemente se va scrie in vectorul de reuniune o singura data
+				R[k] = a[i];
+				i++;
+				j++; //se trece la urmatorul element din a doua multime
+				k++;
+			}
+			else //se iau elemente din a doua multime, mai mici decat elementul din prima multime cu care se compara
+			{
+				R[k] = b[j];
+				j++;
+				k++;
+			}
+	}
+	//in continuare vom verifica daca exista inca elemente din cele doua multimi ce nu au fost adaugate in vector
+		while (i < m) { //exista astfel de elemente in prima multime
+			R[k] = a[i];
+			i++;
+			k++;
+		}
+		while (j < n) { //exista astfel de elemente in a doua multime
+			R[k] = b[j];
+			j++;
+			k++;
+		}
+}
+
+void Intersectie(int *a, int *b, int m, int n)
+{
+	I = (int*)malloc(m * sizeof(int)); 
+	//in cazul intersectiei, maximul de elemente ce pot aparea in acest vector este chiar numarul de elemente dintr-o multime
+	//de exemplu: daca multimile sunt egale, se vor lua toate elementele dintr-o multime, nu conteaza care
+	i = 0;
+	j = 0;
+	k = 0;
+	while (i < m && j < n) { 
+		if (a[i] < b[j]) i++; //daca se gasesc elemente diferite, se trece mai departe
+		else
+			if (a[i] == b[j]) { //vectorul de intersectie e format doar din elementele comune celor doua multimi
+				I[k] = a[i]; //se ia unul din aceste elemente comune, nu conteaza care
+				i++;
+				j++;
+				k++;
+			}
+			else j++; //daca se gasesc elemente diferite, se trece mai departe
+	}
+	//nu se mai trateaza cazul in care verificam daca au ramas elemente neadaugate in vector, deoarece acestea nu sunt comune
+	if (k == 0) fprintf(fout, "Multimea vida"); //daca nu se gasesc elemente comune celor doua multimi, adica, daca k, contorul vectorului ramane neschimbat, se va afisa acest mesaj
+}
+
+void DifA(int *a, int *b, int m, int n)
+{
+	D1 = (int*)malloc(m * sizeof(int)); 
+	//numarul maxim de elemente pe care le poate avea acest vector, e numarul de elemente din prima multime, in cazul in care toate sunt diferite de cele din a doua multime
+	i = 0;
+	j = 0;
+	k = 0;
+	while (i < m && j < n) {
+		if (a[i] < b[j]) {
+			D1[k] = a[i];
+			i++;
+			k++;
+		}
+		else
+			if (a[i] == b[j]) { //daca sunt egale, se trece mai departe
+				i++;
+				j++;
+			}
+			else j++; //ne intereseaza doar elementele din prima multime ce nu exista in a doua
+	}
+	while (i < m) {
+		D1[k] = a[i];
+		i++;
+		k++;
+	}
+	if (k == 0) fprintf(fout, "Multimea vida"); //se afiseaza mesajul daca toate elementele din prima multime, se regasesc si in a doua
+}
+
+void DifB(int *a, int *b, int m, int n)
+{
+	D2 = (int*)malloc(n * sizeof(int)); //asemenea cazului anterior, dar pentru a doua multime
+	i = 0;
+	j = 0;
+	k = 0;
+	while (i < m && j < n) {
+		if (a[i] < b[j]) i++;  //ne intereseaza doar elementele din a doua multime ce nu exista in prima
+		else
+			if (a[i] == b[j]) {
+				i++;
+				j++;
+			}
+			else {
+				D2[k] = b[j];
+				j++;
+				k++;
+			}
+	}
+	while (j < n) {
+		D2[k] = b[j];
+		j++;
+		k++;
+	}
+	if (k == 0) fprintf(fout, "Multimea vida"); //se afiseaza mesajul daca toate elementele din a doua multime, se regasesc si in prima
+}
+
+int main()
+{
+	fin = fopen("mul.in", "r"); 
+	if (fin == NULL) {
+		printf("Eroare la deschiderea fisierului de intrare!");
+		return 0;
+	}
+	fout = fopen("mul.out", "w");
+	if (fout == NULL) {
+		printf("Eroare la deschiderea fisierului de iesire!");
+		return 0;
+	}
+	fscanf(fin, "%d", &m); //se citeste nr de elemente din prima multime
+	a = (int*)malloc(m * sizeof(int)); //se aloca spatiu pentru prima multime
+	for (i = 0; i < m; i++) {
+		fscanf(fin, "%d", &a[i]); //se citesc elementele din prima multime
+		if (a[i] < 0) {
+			fprintf(fout, "Valorile introduse in prima multime nu sunt numere naturale");
+			return 0;
+		}
+	}
+	fscanf(fin, "%d", &n); //se citeste nr de elemente din a doua multime
+	b = (int*)malloc(n * sizeof(int));  //se aloca spatiu pentru a doua multime
+	for (i = 0; i < n; i++) {
+		fscanf(fin, "%d", &b[i]); //se citesc elementele din a doua multime
+		if (b[i] < 0) {
+			fprintf(fout, "Valorile introduse in a doua multime nu sunt numere naturale"); //valorile din vector trebuie sa fie nr naturale
+			return 0;
+		}
+	}
+	fprintf(fout, "Reuniunea: ");
+	Reuniune(a, b, m, n);
+	for(i=0; i<k; i++)
+	fprintf(fout, "%d ", R[i]);
+	fprintf(fout, "\n");
+	fprintf(fout, "Intersectia: ");
+	Intersectie(a, b, m, n);
+	for (i = 0; i < k; i++)
+		fprintf(fout, "%d ", I[i]);
+	fprintf(fout, "\n");
+	fprintf(fout, "A/B: ");
+	DifA(a, b, m, n);
+	for (i = 0; i < k; i++)
+		fprintf(fout, "%d ", D1[i]);
+	fprintf(fout, "\n");
+	fprintf(fout, "B/A: ");
+	DifB(a, b, m, n);
+	for (i = 0; i < k; i++)
+		fprintf(fout, "%d ", D2[i]);
+	fprintf(fout, "\n");
+    system("pause");
+    return 0;
+}
