@@ -1,0 +1,66 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+int i, l=0, n, k, *v, vf[1001],Max=0;
+//vf reprezinta vectorul de frecventa, initial avand toate valorile pe 0
+//unde vf[i]= nr de elemente din vector care au restul modulo k egal cu i
+int main()
+{
+	FILE *fin, *fout;
+	fin = fopen("ndk.in", "r");
+	if (fin == NULL) {
+		printf("Eroare la deschiderea fisierului de intrare!");
+		return 0;
+	}
+	fscanf(fin, "%d%d", &n, &k); 
+	fout = fopen("ndk.out", "w");
+	if (fout == NULL) {
+		printf("Eroare la deschiderea fisierului de iesire!");
+		return 0;
+	}
+	if(n<=0 || n>=100000 || k<=0 || k>=1000){
+			fprintf(fout, "Valorile introduse nu se afla in intervalul definit");
+			return 0;
+	}
+	if (k == 1) {
+		fprintf(fout, "Nu exista valori a caror suma sa nu fie divizibila cu 1");
+		return 0;
+	}
+	v = (int*)malloc(n * sizeof(int)); //se aloca spatiu pentru vector
+	for (i = 0; i < n; i++) {
+		fscanf(fin, "%d", &v[i]);
+		if(v[i]<0){
+			fprintf(fout, "Valorile introduse nu se afla in intervalul definit"); //valorile din vector trebuie sa fie nr naturale
+			return 0;
+		}
+		vf[v[i] % k]++;  //creste in vectorul de frecventa valoarea de la pozitia ce reprezinta restul impartirii valorii din vector la k, intre 0 si k-1 
+	}
+	fclose(fin);
+   
+	/*nu convin urmatoarele combinatii:
+	0 si 0
+	1 si k - 1
+	2 si k - 2
+	3 si k - 3
+	...
+	i si k - i
+	astfel, va trebui sa luam ori toate valorile cu restul i ori toate cele cu restul k - i
+	deci pentru a maximiza numarul de valori din secventa pe care o cautam, vom lua maximul, frecventa mai mare, dintre aceste perechi, pe rand
+	*/
+
+	if (k == 2) l = 2; //daca k e 2, nu exista o secventa mai mare de 2 elemente a caror suma sa nu fie divizibila cu 2
+	//in acest caz, se pot lua: un numar par si unul impar, care vor avea suma un numar impar
+	else {
+		if (vf[0] != 0) l = 1; //daca restul e 0, vom adauga doar o valoare cu acest rest, deoarece mai multe valori de acest fel vor da o suma divizibila cu k
+		for (i = 1; i <= k / 2; i++) //parcurgem vectorul de frecventa pana la jumatatea acestuia, deoarece testam capetele acestuia doua cate doua
+		{
+			Max = vf[i];  //se ia initial drept valoare maxima
+			if (vf[k - i] > vf[i]) Max = vf[k - i]; //daca perechea sa e mai mare, maximul se va schimba
+			l = l + Max;  //l retine numarul maxim de valori din secventa 
+		}
+	}
+	fprintf(fout, "%d\n", l);
+	fclose(fout);
+	system("pause");
+	return 0;
+}
